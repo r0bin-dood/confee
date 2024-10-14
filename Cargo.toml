@@ -1,7 +1,9 @@
 [package]
 name = "confee"
 version = "0.1.0"
+license = "MIT"
 edition = "2021"
 description = "Parse your simple configuration files with confee for a good time :)"
+authors = ["r0bin"]
 
 [dependencies]
