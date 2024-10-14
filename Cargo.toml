@@ -1,9 +1,17 @@
 [package]
 name = "confee"
-version = "0.1.1"
+version = "0.1.2"
 license = "MIT"
 edition = "2021"
 description = "Parse your simple configuration files with confee for a good time :)"
+categories = ["configuration"]
+keywords = [
+  "config",
+  "configuration",
+  "settings",
+  "file"
+]
+repository = "https://github.com/r0bin-dood/confee"
 authors = ["r0bin"]
 
 [dependencies]
