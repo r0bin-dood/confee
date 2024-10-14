@@ -45,6 +45,9 @@ impl Conf {
         self.delim = Some(delim);
         self
     }
+    pub fn and_delim(&mut self, delim: char) -> &mut Self {
+        self.with_delim(delim)
+    }
     /// Gets the delimiter set for this Conf
     pub fn delim(&self) -> char {
         self.delim.unwrap_or(DEFAULT_DELIM)
@@ -54,6 +57,9 @@ impl Conf {
     pub fn with_file(&mut self, conf_file_name: &str) -> &mut Self {
         self.conf_file_name = conf_file_name.to_string();
         self
+    }
+    pub fn and_file(&mut self, conf_file_name: &str) -> &mut Self {
+        self.with_file(conf_file_name)
     }
     /// Gets the configuration file name set for this Conf
     pub fn file(&self) -> &String {

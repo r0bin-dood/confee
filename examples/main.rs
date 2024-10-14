@@ -2,7 +2,7 @@
 use std::env;
 use confee::conf::*;
 use std::net::IpAddr;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 macro_rules! conf_defaults {
     () => {
