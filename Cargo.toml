@@ -4,7 +4,6 @@ version = "0.1.2"
 license = "MIT"
 edition = "2021"
 description = "Parse your simple configuration files with confee for a good time :)"
-categories = ["configuration"]
 keywords = [
   "config",
   "configuration",
