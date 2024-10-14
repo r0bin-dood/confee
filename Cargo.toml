@@ -12,5 +12,6 @@ keywords = [
 ]
 repository = "https://github.com/r0bin-dood/confee"
 authors = ["r0bin"]
+documentation = "https://docs.rs/confee/latest/confee/"
 
 [dependencies]

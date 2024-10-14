@@ -75,4 +75,6 @@ fn main() {
 
 ## Documentation
 
-Run `cargo doc --open` to view in-code docummentation
+Run `cargo doc --open` to view in-code docummentation locally, or visit:
+
+https://docs.rs/confee/latest/confee/index.html
