@@ -9,6 +9,8 @@ const DEFAULT_DELIM: char = ':';
 pub struct Conf {
     pairs: HashMap<String, String>,
     delim: Option<char>,
+    conf_file_name: String,
+    updated: bool,
     empty_string: String,
 }
 
@@ -17,7 +19,9 @@ impl Conf {
         Self {
             pairs: HashMap::from(defaults),
             delim: None,
+            conf_file_name: "".to_string(),
             empty_string: "".to_string(),
+            updated: false,
         }
     }
 
@@ -25,9 +29,20 @@ impl Conf {
         self.delim = Some(delim);
         self
     }
+    pub fn delim(&self) -> char {
+        self.delim.unwrap_or(DEFAULT_DELIM)
+    }
 
-    pub fn update(&mut self, conf_file: &str) {
-        let lines = Self::read_lines(conf_file);
+    pub fn with_conf_file(&mut self, conf_file_name: &str) -> &mut Self {
+        self.conf_file_name = conf_file_name.to_string();
+        self
+    }
+    pub fn conf_file(&self) -> &String {
+        &self.conf_file_name
+    }
+
+    pub fn update(&mut self) {
+        let lines = Self::read_lines(&self.conf_file_name);
         for line in lines {
             let i = line
                 .find(self.delim.unwrap_or(DEFAULT_DELIM))
@@ -38,6 +53,7 @@ impl Conf {
                 .entry(key.to_string())
                 .and_modify(|v| *v = value.to_string());
         }
+        self.updated = true;
     }
     fn read_lines(file_name: &str) -> Vec<String> {
         fs::read_to_string(file_name)
@@ -45,6 +61,10 @@ impl Conf {
             .lines()
             .map(String::from)
             .collect()
+    }
+
+    pub fn is_updated(&self) -> bool {
+        self.updated
     }
 
     pub fn get<T: FromStr>(&self, key: &str) -> Option<T> {
@@ -72,7 +92,7 @@ impl Display for Conf {
                 f,
                 "{}{} {}",
                 key,
-                self.delim.unwrap_or(DEFAULT_DELIM),
+                self.delim(),
                 formatted_value
             )?;
         }
