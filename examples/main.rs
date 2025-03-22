@@ -1,6 +1,5 @@
-
-use std::env;
 use confee::conf::*;
+use std::env;
 use std::net::IpAddr;
 use std::path::PathBuf;
 
@@ -24,11 +23,10 @@ fn main() {
         Err(e) => panic!("Error updating configuration: {}", e),
     }
 
-    
     let dir: PathBuf = conf.get("dir").unwrap();
     let addr: IpAddr = conf.get("addr").unwrap();
     let port: u16 = conf.get("port").unwrap();
-    
+
     println!("log:  {}", conf["log"]);
     println!("dir:  {}", dir.to_string_lossy());
     println!("addr: {}", addr);

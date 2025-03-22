@@ -5,10 +5,10 @@ use std::{collections::HashMap, fs};
 
 const DEFAULT_DELIM: char = ':';
 
-/// Conf is more or less a wrapper around HashMap<String, String>, and it controls access to (key, value) pairs, which
-/// represent configuration properties for an application and their respective values. It offers methods 
+/// Conf is more or less a wrapper around `HashMap`<String, String>, and it controls access to (key, value) pairs, which
+/// represent configuration properties for an application and their respective values. It offers methods
 /// to ergonomically and safely parse a configuration file and update the defaults previously set by the user.
-/// 
+///
 
 #[derive(Debug)]
 pub struct Conf {
@@ -30,12 +30,13 @@ impl Conf {
     ///     ("yee".to_string(), "haw".to_string()),
     /// ]);
     /// ```
+    #[must_use]
     pub fn from<const N: usize>(defaults: [(String, String); N]) -> Self {
         Self {
             pairs: HashMap::from(defaults),
             delim: None,
-            conf_file_name: "".to_string(),
-            empty_string: "".to_string(),
+            conf_file_name: String::new(),
+            empty_string: String::new(),
             updated: false,
         }
     }
@@ -49,6 +50,7 @@ impl Conf {
         self.with_delim(delim)
     }
     /// Gets the delimiter set for this Conf
+    #[must_use]
     pub fn delim(&self) -> char {
         self.delim.unwrap_or(DEFAULT_DELIM)
     }
@@ -62,14 +64,18 @@ impl Conf {
         self.with_file(conf_file_name)
     }
     /// Gets the configuration file name set for this Conf
+    #[must_use]
     pub fn file(&self) -> &String {
         &self.conf_file_name
     }
 
     /// Updates Conf with new values, given the file name has been set
-    /// 
+    ///
+    /// # Errors
+    ///     This function could return errors if no lines are read from
+    ///     file, or if the delimeter is not found.
     /// # Examples
-    /// 
+    ///
     /// ```
     /// let mut conf = Conf::from([
     ///     ("foo".to_string(), "bar".to_string()),
@@ -85,7 +91,7 @@ impl Conf {
         for line in lines {
             let i = line
                 .find(self.delim.unwrap_or(DEFAULT_DELIM))
-                .ok_or_else(|| format!("No delimiter found in line: {}", line))?;
+                .ok_or_else(|| format!("No delimiter found in line: {line}"))?;
             let key = line[..i].trim();
             let value = line[i + 1..].trim();
             self.pairs
@@ -101,6 +107,7 @@ impl Conf {
     }
 
     /// Gets the update status for this Conf
+    #[must_use]
     pub fn is_updated(&self) -> bool {
         self.updated
     }
@@ -119,6 +126,7 @@ impl Conf {
     /// let port = conf.get::<u16>("port").unwrap();
     /// let is_valid: bool = conf.get("is_valid").unwrap();
     /// ```
+    #[must_use]
     pub fn get<T: FromStr>(&self, key: &str) -> Option<T> {
         self.pairs.get(key).and_then(|v| v.parse::<T>().ok())
     }
