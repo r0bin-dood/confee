@@ -32,5 +32,9 @@ fn main() {
     println!("addr: {}", addr);
     println!("port: {}", port);
 
+    for (key, value) in &conf {
+        println!("* {key}: {value}");
+    }
+
     dbg!(conf);
 }

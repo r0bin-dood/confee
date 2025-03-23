@@ -3,8 +3,6 @@ use std::ops::Index;
 use std::str::FromStr;
 use std::{collections::HashMap, fs};
 
-const DEFAULT_DELIM: char = ':';
-
 /// Conf is more or less a wrapper around `HashMap`<String, String>, and it controls access to (key, value) pairs, which
 /// represent configuration properties for an application and their respective values. It offers methods
 /// to ergonomically and safely parse a configuration file and update the defaults previously set by the user.
@@ -13,37 +11,15 @@ const DEFAULT_DELIM: char = ':';
 #[derive(Debug)]
 pub struct Conf {
     pairs: HashMap<String, String>,
-    delim: Option<char>,
+    delim: char,
     conf_file_name: String,
-    updated: bool,
     empty_string: String,
 }
 
 impl Conf {
-    /// Creates a Conf, given user defaults
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// let mut conf = Conf::from([
-    ///     ("foo".to_string(), "bar".to_string()),
-    ///     ("yee".to_string(), "haw".to_string()),
-    /// ]);
-    /// ```
-    #[must_use]
-    pub fn from<const N: usize>(defaults: [(String, String); N]) -> Self {
-        Self {
-            pairs: HashMap::from(defaults),
-            delim: None,
-            conf_file_name: String::new(),
-            empty_string: String::new(),
-            updated: false,
-        }
-    }
-
     /// Sets the delimiter for this Conf
     pub fn with_delim(&mut self, delim: char) -> &mut Self {
-        self.delim = Some(delim);
+        self.delim = delim;
         self
     }
     pub fn and_delim(&mut self, delim: char) -> &mut Self {
@@ -52,7 +28,7 @@ impl Conf {
     /// Gets the delimiter set for this Conf
     #[must_use]
     pub fn delim(&self) -> char {
-        self.delim.unwrap_or(DEFAULT_DELIM)
+        self.delim
     }
 
     /// Sets the configuration file name for this Conf
@@ -90,7 +66,7 @@ impl Conf {
         let lines = self.read_lines()?;
         for line in lines {
             let i = line
-                .find(self.delim.unwrap_or(DEFAULT_DELIM))
+                .find(self.delim)
                 .ok_or_else(|| format!("No delimiter found in line: {line}"))?;
             let key = line[..i].trim();
             let value = line[i + 1..].trim();
@@ -98,18 +74,11 @@ impl Conf {
                 .entry(key.to_string())
                 .and_modify(|v| *v = value.to_string());
         }
-        self.updated = true;
         Ok(())
     }
     fn read_lines(&self) -> Result<Vec<String>, String> {
         let contents = fs::read_to_string(&self.conf_file_name).map_err(|e| e.to_string())?;
         Ok(contents.lines().map(String::from).collect())
-    }
-
-    /// Gets the update status for this Conf
-    #[must_use]
-    pub fn is_updated(&self) -> bool {
-        self.updated
     }
 
     /// Function to index into Conf, and attempt type conversion.
@@ -129,6 +98,45 @@ impl Conf {
     #[must_use]
     pub fn get<T: FromStr>(&self, key: &str) -> Option<T> {
         self.pairs.get(key).and_then(|v| v.parse::<T>().ok())
+    }
+}
+
+/// Creates a Conf, given user defaults
+///
+/// # Examples
+///
+/// ```
+/// let mut conf = Conf::from([
+///     ("foo".to_string(), "bar".to_string()),
+///     ("yee".to_string(), "haw".to_string()),
+/// ]);
+/// ```
+impl<const N: usize> From<[(String, String); N]> for Conf {
+    fn from(defaults: [(String, String); N]) -> Self {
+        Self {
+            pairs: HashMap::from(defaults),
+            delim: ':',
+            conf_file_name: String::new(),
+            empty_string: String::new(),
+        }
+    }
+}
+
+/// Makes the Conf type iterable
+///
+/// # Examples
+///
+/// ```
+/// for (key, value) in &conf {
+///     println!("{key}: {value}");
+/// }
+/// ```
+impl<'a> IntoIterator for &'a Conf {
+    type Item = (&'a String, &'a String);
+    type IntoIter = std::collections::hash_map::Iter<'a, String, String>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.pairs.iter()
     }
 }
 
@@ -164,7 +172,7 @@ impl Index<&str> for Conf {
 /// ```
 impl Display for Conf {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        for (key, value) in &self.pairs {
+        for (key, value) in self {
             let formatted_value = if value.is_empty() {
                 &self.empty_string
             } else {
